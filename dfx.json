@@ -3,15 +3,24 @@
     "key": {
       "candid": "src/key/key.did",
       "package": "key",
-      "type": "rust"
+      "type": "rust",
+      "dependencies": [
+        "system_api"
+      ]
     },
     "simple_oracle": {
       "candid": "src/simple_oracle/simple_oracle.did",
       "package": "simple_oracle",
       "type": "rust",
       "dependencies": [
-        "key"
+        "key",
+        "system_api"
       ]
+    },
+    "system_api": {
+      "candid": "src/system_api/vetkd_system_api.did",
+      "package": "vetkd_system_api",
+      "type": "rust"
     }
   },
   "defaults": {
