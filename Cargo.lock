@@ -620,17 +620,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "key"
-version = "0.1.0"
-dependencies = [
- "candid",
- "hex",
- "ic-cdk",
- "ic-cdk-timers",
- "serde",
-]
-
-[[package]]
 name = "lalrpop"
 version = "0.19.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1297,6 +1286,17 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "vetkd_backend"
+version = "0.1.0"
+dependencies = [
+ "candid",
+ "hex",
+ "ic-cdk",
+ "ic-cdk-timers",
+ "serde",
+]
 
 [[package]]
 name = "vetkd_system_api"

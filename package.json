@@ -1,5 +1,5 @@
 {
-  "name": "secret_oracle_frontend",
+  "name": "front",
   "version": "0.2.0",
   "description": "Internet Computer starter application",
   "keywords": [
@@ -14,12 +14,14 @@
     "start": "webpack serve --mode development --env development",
     "deploy:local": "dfx deploy --network=local",
     "deploy:ic": "dfx deploy --network=ic",
-    "generate": "dfx generate secret_oracle_backend"
+    "generate": "dfx generate vetkd_backend"
   },
   "dependencies": {
-    "@dfinity/agent": "^0.19.2",
-    "@dfinity/candid": "^0.19.2",
-    "@dfinity/principal": "^0.19.2"
+    "@dfinity/agent": "^0.18.1",
+    "@dfinity/auth-client": "^0.18.1",
+    "@dfinity/candid": "^0.18.1",
+    "@dfinity/principal": "^0.18.1",
+    "ic-vetkd-utils": "file:ic-vetkd-utils-0.1.0.tgz"
   },
   "devDependencies": {
     "assert": "2.0.0",
@@ -32,12 +34,12 @@
     "stream-browserify": "3.0.0",
     "terser-webpack-plugin": "^5.3.3",
     "util": "0.12.4",
-    "webpack": "^5.73.0",
+    "webpack": "^5.88.2",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.8.1"
   },
   "engines": {
-    "node": "^12 || ^14 || ^16 || ^18"
+    "node": "^12 || ^14 || ^16 || ^18 || ^19"
   },
   "browserslist": [
     "last 2 chrome version",

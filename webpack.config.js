@@ -7,7 +7,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
-const frontendDirectory = "secret_oracle_frontend";
+const frontendDirectory = "front";
 
 const frontend_entry = path.join("src", frontendDirectory, "src", "index.html");
 
@@ -76,6 +76,9 @@ module.exports = {
       ],
     }),
   ],
+  experiments: {
+    asyncWebAssembly: true,
+  },
   // proxy /api to port 4943 during development.
   // if you edit dfx.json to define a project-specific local network, change the port to match.
   devServer: {
