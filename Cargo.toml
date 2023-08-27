@@ -1,4 +1,5 @@
 [workspace]
 members = [
-    "src/secret_oracle_backend",
+    "src/key",
+    "src/simple_oracle"
 ]

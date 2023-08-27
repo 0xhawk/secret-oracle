@@ -1,22 +1,17 @@
 {
   "canisters": {
-    "secret_oracle_backend": {
-      "candid": "src/secret_oracle_backend/secret_oracle_backend.did",
-      "package": "secret_oracle_backend",
+    "key": {
+      "candid": "src/key/key.did",
+      "package": "key",
       "type": "rust"
     },
-    "secret_oracle_frontend": {
+    "simple_oracle": {
+      "candid": "src/simple_oracle/simple_oracle.did",
+      "package": "simple_oracle",
+      "type": "rust",
       "dependencies": [
-        "secret_oracle_backend"
-      ],
-      "frontend": {
-        "entrypoint": "src/secret_oracle_frontend/src/index.html"
-      },
-      "source": [
-        "src/secret_oracle_frontend/assets",
-        "dist/secret_oracle_frontend/"
-      ],
-      "type": "assets"
+        "key"
+      ]
     }
   },
   "defaults": {
