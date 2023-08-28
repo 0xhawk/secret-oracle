@@ -3,9 +3,9 @@ import { simple_oracle } from "../../declarations/simple_oracle";
 import * as vetkd from "ic-vetkd-utils";
 import { AuthClient } from "@dfinity/auth-client"
 import { HttpAgent, Actor } from "@dfinity/agent";
-import { Principal } from "@dfinity/principal";
 
 let fetched_symmetric_key = null;
+let oracle_key = null;
 let vetkd_backend_actor = vetkd_backend;
 let simple_oracle_actor = simple_oracle;
 let vetkd_backend_principal = await Actor.agentOf(vetkd_backend_actor).getPrincipal();
@@ -25,7 +25,6 @@ document.getElementById("get_symmetric_key_form").addEventListener("submit", asy
 
   fetched_symmetric_key = aes_256_key;
   update_plaintext_button_state();
-  update_ciphertext_button_state();
 
   return false;
 });
@@ -49,24 +48,6 @@ document.getElementById("encrypt_form").addEventListener("submit", async (e) => 
   return false;
 });
 
-document.getElementById("decrypt_form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const button = e.target.querySelector("button");
-  button.setAttribute("disabled", true);
-  const result = document.getElementById("decrypt_result");
-
-  result.innerText = "Decrypting...";
-  try {
-    const plaintext = await aes_gcm_decrypt(document.getElementById("ciphertext").value, fetched_symmetric_key);
-    result.innerText = "plaintext: " + plaintext;
-  } catch (e) {
-    result.innerText = "Error: " + e;
-  }
-
-  button.removeAttribute("disabled");
-  return false;
-});
-
 document.getElementById("set_value_form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const button = e.target.querySelector("button");
@@ -79,17 +60,37 @@ document.getElementById("set_value_form").addEventListener("submit", async (e) =
   try {
     await set_value(key, value);
     result.innerText = "Key: " + hex_encode(key) + " Value: " + value;
+    oracle_key = key;
   } catch (e) {
     result.innerText = "Error: " + e;
   }
+
+  const get_value_button = document.getElementById("submit_decript");
+  get_value_button.removeAttribute("disabled");
+});
+
+document.getElementById("decrypt_form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const button = e.target.querySelector("button");
+  button.setAttribute("disabled", true);
+  const result = document.getElementById("decrypt_result");
+
+  result.innerText = "Fetching and decrypting...";
+
+  try {
+    const ciphertext = await get_value(oracle_key);
+    const plaintext = await aes_gcm_decrypt(ciphertext, fetched_symmetric_key);
+    result.innerText = "data: " + plaintext;
+  } catch (e) {
+    result.innerText = "Error: " + e;
+  }
+
+  button.removeAttribute("disabled");
+  return false;
 });
 
 document.getElementById("plaintext").addEventListener("keyup", async (e) => {
   update_plaintext_button_state();
-});
-
-document.getElementById("ciphertext").addEventListener("keyup", async (e) => {
-  update_ciphertext_button_state();
 });
 
 function update_plaintext_button_state() {
@@ -101,17 +102,13 @@ function update_plaintext_button_state() {
   }
 }
 
-function update_ciphertext_button_state() {
-  const submit_ciphertext_button = document.getElementById("submit_ciphertext");
-  if (document.getElementById("ciphertext").value === "" || fetched_symmetric_key === null) {
-    submit_ciphertext_button.setAttribute("disabled", true);
-  } else {
-    submit_ciphertext_button.removeAttribute("disabled");
-  }
-}
-
 async function set_value(key, value) {
   await simple_oracle_actor.set_val(key, value);
+}
+
+async function get_value(key) {
+  let result = await simple_oracle_actor.get_val_unwrap(key);
+  return result
 }
 
 async function get_aes_256_gcm_key() {
@@ -181,7 +178,7 @@ document.getElementById("login").onclick = async (e) => {
   fetched_symmetric_key = null;
   document.getElementById("get_symmetric_key_result").innerText = "";
   update_plaintext_button_state();
-  update_ciphertext_button_state();
+  // update_ciphertext_button_state();
 
   return false;
 };

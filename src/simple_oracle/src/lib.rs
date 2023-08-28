@@ -30,6 +30,12 @@ pub fn get_val(key: Key) -> Option<CipherValue> {
     })
 }
 
+#[update]
+#[candid_method(update)]
+pub fn get_val_unwrap(key: Key) -> CipherValue {
+    get_val(key).unwrap_or_default()
+}
+
 #[init]
 fn init() {
     let caller = ic_cdk::caller();
