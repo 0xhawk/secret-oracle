@@ -1,6 +1,5 @@
 [workspace]
 members = [
-    "src/vetkd_backend",
     "src/simple_oracle",
     "src/system_api"
 ]

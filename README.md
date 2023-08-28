@@ -20,14 +20,12 @@ The project structure is mainly as follows:
   |--/front 
   |--/simple_oracle
   |--/system_api
-  |--/vetkd_backend
 ic-vetkd-utils-0.1.0.tgz
 Makefile
 ```
 
 - `system_api`: This is an unsafe implementation copied from this [repo](https://github.com/dfinity/examples/tree/master/rust/vetkd) to access to the system api related with the vetKD core functionalities.
-- `vetkd_backend`: This has the basic function to get an encrypted key and a public key copied from this [repo](https://github.com/dfinity/examples/tree/master/rust/vetkd/src/app_backend). In this demo, the IBE related functions are deleted and focused on the minimam implementations.
-- `simple_oracle`: This is a simple oracle and has only simple setter and getter functions for data, which is stored as the cipher text format. We cannot see the raw data from this canister directly because all data are encrypted.
+- `simple_oracle`: This is a simple oracle and has only simple setter and getter functions for data, which is stored as the cipher text format. We cannot see the raw data from this canister directly because all data are encrypted. This also has the basic function to get an encrypted key and a public key copied from this [repo](https://github.com/dfinity/examples/tree/master/rust/vetkd/src/app_backend). In this demo, the IBE related functions are deleted and focused on the minimam implementations.
 - `front`: This is based on JavaScript working in the browser in this demo to use the `ic-vetkd-utils-0.1.0.tgz` as it is. However, you can replace this with a backend canister after we are able to use the library in the backend. The data provider no longer needs to be on the JavaScript working on the browser in that case.
 
 ## Running the project locally
@@ -51,5 +49,4 @@ URLs:
   Backend canister via Candid interface:
     simple_oracle: http://127.0.0.1:4943/?canisterId=bnz7o-iuaaa-aaaaa-qaaaa-cai&id=be2us-64aaa-aaaaa-qaabq-cai
     system_api: http://127.0.0.1:4943/?canisterId=bnz7o-iuaaa-aaaaa-qaaaa-cai&id=s55qq-oqaaa-aaaaa-aaakq-cai
-    vetkd_backend: http://127.0.0.1:4943/?canisterId=bnz7o-iuaaa-aaaaa-qaaaa-cai&id=bd3sg-teaaa-aaaaa-qaaba-cai
 ```

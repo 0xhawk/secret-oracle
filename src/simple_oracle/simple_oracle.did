@@ -5,4 +5,6 @@ service : {
   "get_val": (key) -> (opt cipher_value) query;
   "get_val_unwrap": (key) -> (cipher_value);
   "set_val": (key, cipher_value) -> ();
+  "encrypted_symmetric_key_for_caller": (blob) -> (text);
+  "symmetric_key_verification_key": () -> (text);
 }

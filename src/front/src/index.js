@@ -1,15 +1,11 @@
-import { createActor, vetkd_backend } from "../../declarations/vetkd_backend";
 import { simple_oracle } from "../../declarations/simple_oracle";
 import * as vetkd from "ic-vetkd-utils";
-import { AuthClient } from "@dfinity/auth-client"
-import { HttpAgent, Actor } from "@dfinity/agent";
+import { Actor } from "@dfinity/agent";
 
 let fetched_symmetric_key = null;
 let oracle_key = null;
-let vetkd_backend_actor = vetkd_backend;
 let simple_oracle_actor = simple_oracle;
-let vetkd_backend_principal = await Actor.agentOf(vetkd_backend_actor).getPrincipal();
-document.getElementById("principal").innerHTML = annotated_principal(vetkd_backend_principal);
+let simple_oracle_principal = await Actor.agentOf(simple_oracle_actor).getPrincipal();
 
 document.getElementById("get_symmetric_key_form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -114,12 +110,12 @@ async function get_value(key) {
 async function get_aes_256_gcm_key() {
   const seed = window.crypto.getRandomValues(new Uint8Array(32));
   const tsk = new vetkd.TransportSecretKey(seed);
-  const ek_bytes_hex = await vetkd_backend_actor.encrypted_symmetric_key_for_caller(tsk.public_key());
-  const pk_bytes_hex = await vetkd_backend_actor.symmetric_key_verification_key();
+  const ek_bytes_hex = await simple_oracle_actor.encrypted_symmetric_key_for_caller(tsk.public_key());
+  const pk_bytes_hex = await simple_oracle_actor.symmetric_key_verification_key();
   return tsk.decrypt_and_hash(
     hex_decode(ek_bytes_hex),
     hex_decode(pk_bytes_hex),
-    vetkd_backend_principal.toUint8Array(),
+    simple_oracle_principal.toUint8Array(),
     32,
     new TextEncoder().encode("aes-256-gcm")
   );
@@ -152,44 +148,6 @@ async function aes_gcm_decrypt(ciphertext_hex, rawKey) {
     ciphertext
   );
   return new TextDecoder().decode(decrypted);
-}
-
-document.getElementById("login").onclick = async (e) => {
-  e.preventDefault();
-  let authClient = await AuthClient.create();
-  await new Promise((resolve) => {
-    authClient.login({
-      identityProvider: `http://127.0.0.1:4943/?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`,
-      onSuccess: resolve,
-    });
-  });
-  // At this point we're authenticated, and we can get the identity from the auth client:
-  const identity = authClient.getIdentity();
-  // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
-  const agent = new HttpAgent({ identity });
-  // Using the interface description of our webapp, we create an actor that we use to call the service methods. We override the global actor, such that the other button handler will automatically use the new actor with the Internet Identity provided delegation.
-  vetkd_backend_actor = createActor(process.env.vetkd_backend_CANISTER_ID, {
-    agent,
-  });
-  vetkd_backend_principal = identity.getPrincipal();
-
-  document.getElementById("principal").innerHTML = annotated_principal(vetkd_backend_principal);
-
-  fetched_symmetric_key = null;
-  document.getElementById("get_symmetric_key_result").innerText = "";
-  update_plaintext_button_state();
-  // update_ciphertext_button_state();
-
-  return false;
-};
-
-function annotated_principal(principal) {
-  let principal_string = principal.toString();
-  if (principal_string == "2vxsx-fae") {
-    return "Anonymous principal (2vxsx-fae)";
-  } else {
-    return "Principal: " + principal_string;
-  }
 }
 
 const hex_decode = (hexString) =>
