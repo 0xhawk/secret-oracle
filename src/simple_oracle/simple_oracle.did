@@ -1,7 +1,7 @@
-type cipher_value = blob;
 type key = blob;
+type cipher_value = text;
 
 service : {
   "get_val": (key) -> (cipher_value) query;
-  "set_val": (blob, blob) -> (blob);
+  "set_val": (key, cipher_value) -> ();
 }

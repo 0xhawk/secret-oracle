@@ -3,8 +3,8 @@ use candid::{candid_method, Principal};
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-pub type CipherValue = Vec<u8>;
 pub type Key = Vec<u8>;
+pub type CipherValue = String;
 
 thread_local! {
     static STORE: RefCell<HashMap<Key, CipherValue>> = RefCell::new(HashMap::default());
@@ -14,7 +14,8 @@ thread_local! {
 #[update]
 #[candid_method(update)]
 pub fn set_val(key: Key, val: CipherValue) {
-    // TODO: validation
+    // If you restrict the caller to the owner, you can write the assertion like this:
+    // assert_eq!(ic_cdk::caller(), owner());
     STORE.with(|s| {
         s.borrow_mut().insert(key, val);
     });

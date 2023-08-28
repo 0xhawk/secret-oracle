@@ -1,4 +1,5 @@
 import { createActor, vetkd_backend } from "../../declarations/vetkd_backend";
+import { simple_oracle } from "../../declarations/simple_oracle";
 import * as vetkd from "ic-vetkd-utils";
 import { AuthClient } from "@dfinity/auth-client"
 import { HttpAgent, Actor } from "@dfinity/agent";
@@ -6,6 +7,7 @@ import { Principal } from "@dfinity/principal";
 
 let fetched_symmetric_key = null;
 let vetkd_backend_actor = vetkd_backend;
+let simple_oracle_actor = simple_oracle;
 let vetkd_backend_principal = await Actor.agentOf(vetkd_backend_actor).getPrincipal();
 document.getElementById("principal").innerHTML = annotated_principal(vetkd_backend_principal);
 
@@ -37,9 +39,13 @@ document.getElementById("encrypt_form").addEventListener("submit", async (e) => 
   result.innerText = "Encrypting...";
   const ciphertext = await aes_gcm_encrypt(document.getElementById("plaintext").value, fetched_symmetric_key);
 
-  result.innerText = "ciphertext: " + ciphertext;
+  result.innerText = ciphertext;
 
   button.removeAttribute("disabled");
+
+  const set_value_button = document.getElementById("submit_set_value");
+  set_value_button.removeAttribute("disabled");
+
   return false;
 });
 
@@ -59,6 +65,23 @@ document.getElementById("decrypt_form").addEventListener("submit", async (e) => 
 
   button.removeAttribute("disabled");
   return false;
+});
+
+document.getElementById("set_value_form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const button = e.target.querySelector("button");
+  button.setAttribute("disabled", true);
+  const result = document.getElementById("set_value_result");
+
+  result.innerText = "Setting value...";
+  const key = window.crypto.getRandomValues(new Uint8Array(32));
+  const value = document.getElementById("encrypt_result").innerText;
+  try {
+    await set_value(key, value);
+    result.innerText = "Key: " + hex_encode(key) + " Value: " + value;
+  } catch (e) {
+    result.innerText = "Error: " + e;
+  }
 });
 
 document.getElementById("plaintext").addEventListener("keyup", async (e) => {
@@ -85,6 +108,10 @@ function update_ciphertext_button_state() {
   } else {
     submit_ciphertext_button.removeAttribute("disabled");
   }
+}
+
+async function set_value(key, value) {
+  await simple_oracle_actor.set_val(key, value);
 }
 
 async function get_aes_256_gcm_key() {
@@ -128,109 +155,6 @@ async function aes_gcm_decrypt(ciphertext_hex, rawKey) {
     ciphertext
   );
   return new TextDecoder().decode(decrypted);
-}
-
-document.getElementById("ibe_encrypt_form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const button = e.target.querySelector("button");
-  button.setAttribute("disabled", true);
-  const result = document.getElementById("ibe_encrypt_result");
-
-  try {
-    const ibe_ciphertext = await ibe_encrypt(document.getElementById("ibe_plaintext").value);
-    result.innerText = "IBE ciphertext: " + ibe_ciphertext;
-  } catch (e) {
-    result.innerText = "Error: " + e;
-  }
-
-  button.removeAttribute("disabled");
-  return false;
-});
-
-document.getElementById("ibe_decrypt_form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const button = e.target.querySelector("button");
-  button.setAttribute("disabled", true);
-  const result = document.getElementById("ibe_decrypt_result");
-
-  try {
-    const ibe_plaintext = await ibe_decrypt(document.getElementById("ibe_ciphertext").value);
-    result.innerText = "IBE plaintext: " + ibe_plaintext;
-  } catch (e) {
-    result.innerText = "Error: " + e;
-  }
-
-  button.removeAttribute("disabled");
-  return false;
-});
-
-document.getElementById("ibe_plaintext").addEventListener("keyup", async (e) => {
-  update_ibe_encrypt_button_state();
-});
-
-document.getElementById("ibe_principal").addEventListener("keyup", async (e) => {
-  update_ibe_encrypt_button_state();
-});
-
-document.getElementById("ibe_ciphertext").addEventListener("keyup", async (e) => {
-  update_ibe_decrypt_button_state();
-});
-
-function update_ibe_encrypt_button_state() {
-  const ibe_encrypt_button = document.getElementById("ibe_encrypt");
-  if (document.getElementById("ibe_plaintext").value === "" || document.getElementById("ibe_principal").value === "") {
-    ibe_encrypt_button.setAttribute("disabled", true);
-  } else {
-    ibe_encrypt_button.removeAttribute("disabled");
-  }
-}
-
-function update_ibe_decrypt_button_state() {
-  const ibe_decrypt_button = document.getElementById("ibe_decrypt");
-  if (document.getElementById("ibe_ciphertext").value === "") {
-    ibe_decrypt_button.setAttribute("disabled", true);
-  } else {
-    ibe_decrypt_button.removeAttribute("disabled");
-  }
-}
-
-async function ibe_encrypt(message) {
-  document.getElementById("ibe_encrypt_result").innerText = "Fetching IBE encryption key..."
-  const pk_bytes_hex = await vetkd_backend_actor.ibe_encryption_key();
-
-  document.getElementById("ibe_encrypt_result").innerText = "Preparing IBE-encryption..."
-  const message_encoded = new TextEncoder().encode(message);
-  const seed = window.crypto.getRandomValues(new Uint8Array(32));
-  let ibe_principal = Principal.fromText(document.getElementById("ibe_principal").value);
-
-  document.getElementById("ibe_encrypt_result").innerText = "IBE-encrypting for principal" + ibe_principal.toText() + "...";
-  const ibe_ciphertext = vetkd.IBECiphertext.encrypt(
-    hex_decode(pk_bytes_hex),
-    ibe_principal.toUint8Array(),
-    message_encoded,
-    seed
-  );
-  return hex_encode(ibe_ciphertext.serialize());
-}
-
-async function ibe_decrypt(ibe_ciphertext_hex) {
-  document.getElementById("ibe_decrypt_result").innerText = "Preparing IBE-decryption..."
-  const tsk_seed = window.crypto.getRandomValues(new Uint8Array(32));
-  const tsk = new vetkd.TransportSecretKey(tsk_seed);
-  document.getElementById("ibe_decrypt_result").innerText = "Fetching IBE decryption key..."
-  const ek_bytes_hex = await vetkd_backend_actor.encrypted_ibe_decryption_key_for_caller(tsk.public_key());
-  document.getElementById("ibe_decrypt_result").innerText = "Fetching IBE enryption key (needed for verification)..."
-  const pk_bytes_hex = await vetkd_backend_actor.ibe_encryption_key();
-
-  const k_bytes = tsk.decrypt(
-    hex_decode(ek_bytes_hex),
-    hex_decode(pk_bytes_hex),
-    vetkd_backend_principal.toUint8Array()
-  );
-
-  const ibe_ciphertext = vetkd.IBECiphertext.deserialize(hex_decode(ibe_ciphertext_hex));
-  const ibe_plaintext = ibe_ciphertext.decrypt(k_bytes);
-  return new TextDecoder().decode(ibe_plaintext);
 }
 
 document.getElementById("login").onclick = async (e) => {
