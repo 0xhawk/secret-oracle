@@ -13,6 +13,11 @@
       "package": "vetkd_system_api",
       "type": "rust"
     },
+    "data_provider": {
+      "candid": "src/data_provider/data_provider.did",
+      "package": "data_provider",
+      "type": "rust"
+    },
     "front": {
       "dependencies": [
         "simple_oracle",

@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "src/simple_oracle",
-    "src/system_api"
+    "src/system_api",
+    "src/data_provider"
 ]
