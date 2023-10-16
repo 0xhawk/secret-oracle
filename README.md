@@ -54,3 +54,7 @@ URLs:
 ## Check the behaviour from UI
 
 A user first encrypts the data to be stored from the UI using a key and stores the data in `simple_oracle`. After fetching the stored data, the user can access the raw data by decrypting the data with the key the user has.
+
+## DM me if you have any question
+
+Please feel free to reach out to me if you have questions.
